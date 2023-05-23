@@ -1,182 +1,207 @@
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Open Sans', sans-serif;
-  }
-  
-  body {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    background: #E3F2FD;
-  }
-  
-  #header {
-    display: flex;
-    align-items: baseline;
-    justify-content: flex-start;
-    margin-bottom: 5px;
-  }
-  
-  #title {
-    margin-right: 10px;
-    margin-left: 10px;
-  }
-  
-  .info {
-    flex-grow: 1;
-    margin-right: 10px;
-  }
-  
-  #board {
-    background-image: url('../images/background.jpg');
-    background-size: cover;
-    background-repeat: repeat-x;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Open Sans", sans-serif;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-image: linear-gradient(
+    95.2deg,
+    rgba(173, 252, 234, 1) 26.8%,
+    rgba(192, 229, 246, 1) 64%
+  );
+}
+
+#header {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-start;
+  margin-bottom: 5px;
+}
+
+#title {
+  margin-right: 10px;
+  margin-left: 10px;
+}
+
+.info {
+  flex-grow: 1;
+  margin-right: 10px;
+}
+
+#board {
+  background-image: url("../images/background.jpg");
+  background-size: cover;
+  background-repeat: repeat-x;
+  background-position: 0 0;
+  border-style: inset;
+  border-right-width: 2px;
+  width: 60vw;
+  height: 80vh;
+  position: relative;
+  overflow: hidden;
+  margin: 2px auto;
+  padding: 10px;
+  display: block;
+  text-align: left;
+}
+
+#board.animate-background {
+  animation: slide-background 20s linear infinite;
+}
+
+#player {
+  background-image: url("../images/founder.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  position: absolute;
+}
+
+.obstacle {
+  background-image: url("../images/money-big.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  position: absolute;
+}
+
+.money-coin {
+  background-image: url("../images/money-small.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  position: absolute;
+}
+
+.happy-customer {
+  background-image: url("../images/customer.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  position: absolute;
+}
+
+.popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  padding: 40px;
+  border: 2px solid #ccc;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  text-align: center;
+}
+
+.popup h2 {
+  margin-top: 0;
+}
+
+.popup p {
+  margin-bottom: 10px;
+}
+
+ul {
+  list-style: none;
+  padding-left: 75px;
+  text-align: left;
+}
+
+ul li:before {
+  content: "\2714";
+  margin: 0;
+}
+
+@keyframes slide-background {
+  0% {
     background-position: 0 0;
-    border-style: inset;
-    border-right-width: 2px;
-    width: 60vw;
-    height: 80vh;
-    position: relative;
-    overflow: hidden;
-    margin: 2px auto;
-    padding: 10px;
-    display:block;
-    text-align: left;
   }
 
-  #board.animate-background {
-    animation: slide-background 20s linear infinite;
+  100% {
+    background-position: 100% 0;
   }
+}
 
-  
-  #player {
-    background-image: url('../images/founder.png');
-    background-size: contain;
-    background-repeat: no-repeat;
-    position: absolute;
-  }
-  
-  .obstacle {
-    background-image: url('../images/money-big.png');
-    background-size: contain;
-    background-repeat: no-repeat;
-    position: absolute;
-  }
-  
-  .money-coin {
-    background-image: url('../images/money-small.png');
-    background-size: contain;
-    background-repeat: no-repeat;
-    position: absolute;
-  }
-  
-  .happy-customer {
-    background-image: url('../images/customer.png');
-    background-size: contain;
-    background-repeat: no-repeat;
-    position: absolute;
-  }
+/* button styling */
 
-  .popup {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: white;
-    padding: 20px;
-    border: 2px solid #ccc;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    max-width: 400px;
-  }
-  
-  .popup h2 {
-    margin-top: 0;
-  }
-  
-  .popup p {
-    margin-bottom: 10px;
-  }
-  
-  .popup ul {
-    margin-top: 0;
-    padding-left:
-  }  
-  
-  
-  @keyframes slide-background {
-    0% {
-      background-position: 0 0;
-    }
-  
-    100% {
-      background-position: 100% 0;
-    }
-  }
-
-  /* button styling */
-
-  .glow-on-hover {
-    width: 220px;
-    height: 50px;
-    border: none;
-    outline: none;
-    color: #fff;
-    background: #111;
-    cursor: pointer;
-    position: relative;
-    z-index: 0;
-    border-radius: 10px;
-    margin-top: 10px;
+.glow-on-hover {
+  width: 220px;
+  height: 50px;
+  border: none;
+  outline: none;
+  color: #fff;
+  background: #111;
+  cursor: pointer;
+  position: relative;
+  z-index: 0;
+  border-radius: 10px;
+  margin-top: 10px;
 }
 
 .glow-on-hover:before {
-    content: '';
-    background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
-    position: absolute;
-    top: -2px;
-    left:-2px;
-    background-size: 400%;
-    z-index: -1;
-    filter: blur(5px);
-    width: calc(100% + 4px);
-    height: calc(100% + 4px);
-    animation: glowing 20s linear infinite;
-    opacity: 0;
-    transition: opacity .3s ease-in-out;
-    border-radius: 10px;
+  content: "";
+  background: linear-gradient(
+    45deg,
+    #ff0000,
+    #ff7300,
+    #fffb00,
+    #48ff00,
+    #00ffd5,
+    #002bff,
+    #7a00ff,
+    #ff00c8,
+    #ff0000
+  );
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  background-size: 400%;
+  z-index: -1;
+  filter: blur(5px);
+  width: calc(100% + 4px);
+  height: calc(100% + 4px);
+  animation: glowing 20s linear infinite;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  border-radius: 10px;
 }
 
 .glow-on-hover:active {
-    color: #000
+  color: #000;
 }
 
 .glow-on-hover:active:after {
-    background: transparent;
+  background: transparent;
 }
 
 .glow-on-hover:hover:before {
-    opacity: 1;
+  opacity: 1;
 }
 
 .glow-on-hover:after {
-    z-index: -1;
-    content: '';
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background: #111;
-    left: 0;
-    top: 0;
-    border-radius: 10px;
+  z-index: -1;
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: #111;
+  left: 0;
+  top: 0;
+  border-radius: 10px;
 }
 
 @keyframes glowing {
-    0% { background-position: 0 0; }
-    50% { background-position: 400% 0; }
-    100% { background-position: 0 0; }
+  0% {
+    background-position: 0 0;
+  }
+  50% {
+    background-position: 400% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
 }
-  

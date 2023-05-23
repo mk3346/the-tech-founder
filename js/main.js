@@ -10,21 +10,21 @@ class Game {
 
   start() {
     if (!this.isGameStarted) {
-      const startButton = document.getElementById("startButton");
-      startButton.disabled = true;
-
       const popup = document.createElement("div");
       popup.className = "popup";
       popup.innerHTML = `
-        <h2>Instructions</h2>
-        <p>Here are the instructions on how to play the game:</p>
+        <h2>Level 1: Pre-Seed</h2>
+        <br>
+        <p>You have just founded a company and developed a working MVP.</p>
+        <p>In this level your goal is to prove Product-Market Fit by catching 5 customers before money runs out. Make sure to also collect some cash to be better equipped for Level 2.</p>
+        <br>
         <ul>
-          <li>Use the left and right arrow keys to move the player.</li>
-          <li>Collect money coins to increase your money.</li>
-          <li>Collect happy customers to increase your customer count.</li>
-          <li>Avoid collisions with obstacles.</li>
+          <li>     Use the left and right arrow keys to move the player</li>
+          <li>     Collect coins to increase cash at hand</li>
+          <li>     Collect 5 customers to proceed to Level 2 (Seed)</li>
         </ul>
-        <button class="okButton glow-on-hover">OK</button>
+        <br>
+        <button class="okButton glow-on-hover">Start Game</button>
       `;
 
       document.body.appendChild(popup);
@@ -70,12 +70,49 @@ class Game {
     }, 3000);
   }
 
+  stopGame() {
+    for (const interval of this.intervals) {
+      clearInterval(interval);
+    }
+    this.intervals = [];
+
+    if (this.player) {
+      this.player.remove();
+      this.player = null;
+    }
+
+    for (const obstacle of this.obstaclesArr) {
+      obstacle.remove();
+    }
+    this.obstaclesArr = [];
+
+    const boardElement = document.getElementById("board");
+    boardElement.classList.remove("animate-background");
+  }
+
   attachEventListeners() {
+    let isSpacebarPressed = false;
+    let isJumping = false;
+
     document.addEventListener("keydown", (event) => {
       if (event.code === "ArrowLeft") {
         this.player.moveLeft();
       } else if (event.code === "ArrowRight") {
         this.player.moveRight();
+      } else if (event.code === "Space" && !isSpacebarPressed && !isJumping) {
+        isSpacebarPressed = true;
+        isJumping = true;
+        this.player.jump();
+      }
+    });
+
+    document.addEventListener("keyup", (event) => {
+      if (event.code === "Space") {
+        isSpacebarPressed = false;
+        if (isJumping) {
+          isJumping = false;
+          this.player.returnToGround();
+        }
       }
     });
   }
@@ -96,7 +133,7 @@ class Game {
         this.updateMoney(10000);
       } else if (obstacleInstance instanceof HappyCustomer) {
         this.updateCustomers(1);
-        if (this.customers === 3) {
+        if (this.customers === 5) {
           this.showLevel2Alert();
         }
       }
@@ -142,13 +179,19 @@ class Game {
       this.level = 2;
       const level2Popup = document.createElement("div");
       level2Popup.className = "popup";
-      level2Popup.textContent = "Level 2 will start soon!";
+      level2Popup.innerHTML = `
+        <p>Level 2 will start soon!</p>
+        <button class="level2Button glow-on-hover">Start Level 2</button>
+      `;
       document.body.appendChild(level2Popup);
-      setTimeout(() => {
+  
+      const level2Button = level2Popup.getElementsByClassName("level2Button")[0];
+      level2Button.addEventListener("click", () => {
         level2Popup.remove();
-      }, 3000);
+      });
     }
   }
+  
 
   showReplayAlert() {
     if (this.level === 1) {
@@ -170,8 +213,11 @@ class Player {
     this.height = 25;
     this.positionX = 0;
     this.positionY = 0;
+    this.speedMultiplier = 1.5;
     this.domElement = null;
     this.createDomElement();
+    this.isJumping = false;
+    this.jumpHeight = 20;
   }
 
   createDomElement() {
@@ -187,7 +233,7 @@ class Player {
 
   moveLeft() {
     if (this.positionX > 0) {
-      this.positionX--;
+      this.positionX -= this.speedMultiplier;
       this.domElement.style.left = this.positionX + "vw";
     }
   }
@@ -195,9 +241,41 @@ class Player {
   moveRight() {
     const maxWidth = 100 - this.width - 40;
     if (this.positionX < maxWidth) {
-      this.positionX++;
+      this.positionX += this.speedMultiplier;
       this.domElement.style.left = this.positionX + "vw";
     }
+  }
+  jump() {
+    if (!this.isJumping) {
+      this.isJumping = true;
+      this.jumpUp();
+    }
+  }
+
+  jumpUp() {
+    const jumpInterval = requestAnimationFrame(() => {
+      if (this.positionY >= this.jumpHeight) {
+        cancelAnimationFrame(jumpInterval);
+        this.fallDown();
+        return;
+      }
+      this.positionY++;
+      this.domElement.style.bottom = this.positionY + "vh";
+      this.jumpUp();
+    });
+  }
+
+  fallDown() {
+    const fallInterval = requestAnimationFrame(() => {
+      if (this.positionY <= 0) {
+        cancelAnimationFrame(fallInterval);
+        this.isJumping = false;
+        return;
+      }
+      this.positionY--;
+      this.domElement.style.bottom = this.positionY + "vh";
+      this.fallDown();
+    });
   }
 }
 
@@ -245,7 +323,7 @@ class HappyCustomer extends Obstacle {
   constructor() {
     super(3, 10);
     this.domElement.className = "happy-customer";
-    this.speed = 1;
+    this.speed = 1.5;
   }
 
   moveDown() {
@@ -257,6 +335,4 @@ class HappyCustomer extends Obstacle {
 const game = new Game();
 const startButton = document.getElementById("startButton");
 
-startButton.addEventListener("click", () => {
-  game.start();
-});
+game.start();
