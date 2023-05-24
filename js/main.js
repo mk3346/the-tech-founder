@@ -272,7 +272,7 @@ class Player {
   }
 
   moveRight() {
-    const maxWidth = 100 - this.width - 40;
+    const maxWidth = 100 - this.width - 20;
     if (this.positionX < maxWidth) {
       this.positionX += this.speedMultiplier;
       this.domElement.style.left = this.positionX + "vw";
