@@ -41,15 +41,15 @@ class Game {
   }
 
   startGame() {
-    const boardElement = document.getElementById("board");
-    boardElement.classList.add("animate-background");
+    this.boardElement = document.getElementById("board");
+    this.boardElement.classList.add("animate-background");
 
-    setInterval(() => {
+    this.moneyCoinInterval = setInterval(() => {
       const newObstacle = new MoneyCoin();
       this.obstaclesArr.push(newObstacle);
     }, 3700);
 
-    setInterval(() => {
+    this.customerInterval = setInterval(() => {
       const newObstacle = new HappyCustomer();
       this.obstaclesArr.push(newObstacle);
     }, 8500);
@@ -62,7 +62,7 @@ class Game {
       });
     }, 60);
 
-    setInterval(() => {
+    this.moneyDecreaseInterval = setInterval(() => {
       this.updateMoney(-10000);
       if (this.money < 0) {
         this.showReplayAlert();
@@ -71,10 +71,10 @@ class Game {
   }
 
   stopGame() {
-    for (const interval of this.intervals) {
-      clearInterval(interval);
-    }
-    this.intervals = [];
+    this.boardElement.classList.remove("animate-background");
+    clearInterval(this.moneyCoinInterval);
+    clearInterval(this.customerInterval);
+    clearInterval(this.moneyDecreaseInterval);
 
     if (this.player) {
       this.player.remove();
@@ -85,9 +85,6 @@ class Game {
       obstacle.remove();
     }
     this.obstaclesArr = [];
-
-    const boardElement = document.getElementById("board");
-    boardElement.classList.remove("animate-background");
   }
 
   attachEventListeners() {
@@ -133,8 +130,11 @@ class Game {
         this.updateMoney(10000);
       } else if (obstacleInstance instanceof HappyCustomer) {
         this.updateCustomers(1);
-        if (this.customers === 5) {
+        if (this.customers >= 2) {
           this.showLevel2Alert();
+          setTimeout(() => {
+            this.stopGame();
+          }, 2000);
         }
       }
 
@@ -184,14 +184,14 @@ class Game {
         <button class="level2Button glow-on-hover">Start Level 2</button>
       `;
       document.body.appendChild(level2Popup);
-  
-      const level2Button = level2Popup.getElementsByClassName("level2Button")[0];
+
+      const level2Button =
+        level2Popup.getElementsByClassName("level2Button")[0];
       level2Button.addEventListener("click", () => {
         level2Popup.remove();
       });
     }
   }
-  
 
   showReplayAlert() {
     if (this.level === 1) {
