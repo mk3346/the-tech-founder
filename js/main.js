@@ -35,15 +35,12 @@ class Game {
         this.isGameStarted = true;
         this.player = new Player();
         this.attachEventListeners();
-        this.startGame();
+        this.startLevel1();
       });
     }
   }
 
-  startGame() {
-    this.boardElement = document.getElementById("board");
-    this.boardElement.classList.add("animate-background");
-
+  startLevel1() {
     this.moneyCoinInterval = setInterval(() => {
       const newObstacle = new MoneyCoin();
       this.obstaclesArr.push(newObstacle);
@@ -56,9 +53,45 @@ class Game {
 
     setInterval(() => {
       this.obstaclesArr.forEach((obstacleInstance) => {
-        obstacleInstance.moveDown();
         this.detectCollision(obstacleInstance);
-        this.removeObstacleIfOutside(obstacleInstance);
+      });
+    }, 60);
+
+    this.moneyDecreaseInterval = setInterval(() => {
+      this.updateMoney(-10000);
+      if (this.money < 0) {
+        this.showReplayAlert();
+      }
+    }, 3000);
+  }
+
+  startLevel2() {
+    this.boardElement = document.getElementById("board");
+    this.boardElement.style.backgroundImage =
+      "url('../images/background_2.jpg')";
+
+    const customersElement = document.getElementById("customers");
+    customersElement.remove();
+
+    this.fundingStatus = document.createElement("div");
+    this.fundingStatus.id = "funding-status";
+    this.fundingStatus.innerText = "Funding: Seed";
+    const parentElm = document.getElementById("board");
+    parentElm.appendChild(this.fundingStatus);
+
+    this.unicornInterval = setInterval(() => {
+      const newObstacle = new Unicorn();
+      this.obstaclesArr.push(newObstacle);
+    }, 9000);
+
+    this.ventureCapitalistInterval = setInterval(() => {
+      const newObstacle = new VentureCapitalist();
+      this.obstaclesArr.push(newObstacle);
+    }, 6000);
+
+    setInterval(() => {
+      this.obstaclesArr.forEach((obstacleInstance) => {
+        this.detectCollision(obstacleInstance);
       });
     }, 60);
 
@@ -71,15 +104,9 @@ class Game {
   }
 
   stopGame() {
-    this.boardElement.classList.remove("animate-background");
     clearInterval(this.moneyCoinInterval);
     clearInterval(this.customerInterval);
     clearInterval(this.moneyDecreaseInterval);
-
-    if (this.player) {
-      this.player.remove();
-      this.player = null;
-    }
 
     for (const obstacle of this.obstaclesArr) {
       obstacle.remove();
@@ -164,30 +191,36 @@ class Game {
     customersElement.textContent = "Customers: " + this.customers;
   }
 
-  removeObstacleIfOutside(obstacleInstance) {
-    if (obstacleInstance.positionY < 0 - obstacleInstance.height) {
-      obstacleInstance.domElement.remove();
-      const index = this.obstaclesArr.indexOf(obstacleInstance);
-      if (index > -1) {
-        this.obstaclesArr.splice(index, 1);
-      }
-    }
-  }
-
   showLevel2Alert() {
     if (this.level === 1) {
       this.level = 2;
+      const levelElement = document.getElementById("level");
+      levelElement.textContent = "Level: " + this.level;
+
       const level2Popup = document.createElement("div");
       level2Popup.className = "popup";
       level2Popup.innerHTML = `
-        <p>Level 2 will start soon!</p>
-        <button class="level2Button glow-on-hover">Start Level 2</button>
+        <h2>Level 2: Seed to Series C</h2>
+        <br>
+        <p>Congrats! You have achieved Product-Market Fit and are now at Seed stage.</p>
+        <p>In this level your goal is to scale your start-up by taking on VCs.</p>
+        <br>
+        <ul>
+          <li>     Use the left and right arrow keys to move the player</li>
+          <li>     NEW: Press the spacebar to jump up</li>
+          <li>     Avoid angry customers that will harm your valuation</li>
+          <li>     Get 3 venture capitalists on board</li>
+          <li>     Catch 1 unicorn to push your valuation to +1bn EUR</li>
+        </ul>
+        <br>
+        <button class="level2Button glow-on-hover">Start Game</button>
       `;
       document.body.appendChild(level2Popup);
 
       const level2Button =
         level2Popup.getElementsByClassName("level2Button")[0];
       level2Button.addEventListener("click", () => {
+        this.startLevel2();
         level2Popup.remove();
       });
     }
@@ -213,11 +246,11 @@ class Player {
     this.height = 25;
     this.positionX = 0;
     this.positionY = 0;
-    this.speedMultiplier = 1.5;
+    this.speedMultiplier = 2;
     this.domElement = null;
     this.createDomElement();
     this.isJumping = false;
-    this.jumpHeight = 20;
+    this.jumpHeight = 50;
   }
 
   createDomElement() {
@@ -280,12 +313,11 @@ class Player {
 }
 
 class Obstacle {
-  constructor(width, height) {
+  constructor(width, height, positionY) {
     this.width = width;
     this.height = height;
     this.positionX = Math.floor(Math.random() * (60 - this.width + 1));
-    this.positionY = 100;
-
+    this.positionY = positionY;
     this.domElement = null;
 
     this.createDomElement();
@@ -300,35 +332,89 @@ class Obstacle {
     const parentElm = document.getElementById("board");
     parentElm.appendChild(this.domElement);
   }
-  moveDown() {
-    this.positionY--;
-    this.domElement.style.bottom = this.positionY + "vh";
-  }
 }
 
 class MoneyCoin extends Obstacle {
   constructor() {
-    super(4, 10);
+    super(4, 10, 2);
     this.domElement.className = "money-coin";
-    this.speed = 2;
+    this.appearanceTime = 2000;
+    this.appear();
   }
 
-  moveDown() {
-    this.positionY -= this.speed;
-    this.domElement.style.bottom = this.positionY + "vh";
+  appear() {
+    const parentElm = document.getElementById("board");
+    parentElm.appendChild(this.domElement);
+    setTimeout(() => {
+      this.domElement.remove();
+      const index = this.obstaclesArr.indexOf(this);
+      if (index > -1) {
+        this.obstaclesArr.splice(index, 1);
+      }
+    }, this.appearanceTime);
   }
 }
 
 class HappyCustomer extends Obstacle {
   constructor() {
-    super(3, 10);
+    super(3, 10, 20);
     this.domElement.className = "happy-customer";
-    this.speed = 1.5;
+    this.appearanceTime = 2500;
+    this.appear();
   }
 
-  moveDown() {
-    this.positionY -= this.speed;
-    this.domElement.style.bottom = this.positionY + "vh";
+  appear() {
+    const parentElm = document.getElementById("board");
+    parentElm.appendChild(this.domElement);
+    setTimeout(() => {
+      this.domElement.remove();
+      const index = this.obstaclesArr.indexOf(this);
+      if (index > -1) {
+        this.obstaclesArr.splice(index, 1);
+      }
+    }, this.appearanceTime);
+  }
+}
+
+class VentureCapitalist extends Obstacle {
+  constructor() {
+    super(8, 15, 30);
+    this.domElement.className = "venture-capitalist";
+    this.appearanceTime = 2500;
+    this.appear();
+  }
+
+  appear() {
+    const parentElm = document.getElementById("board");
+    parentElm.appendChild(this.domElement);
+    setTimeout(() => {
+      this.domElement.remove();
+      const index = this.obstaclesArr.indexOf(this);
+      if (index > -1) {
+        this.obstaclesArr.splice(index, 1);
+      }
+    }, this.appearanceTime);
+  }
+}
+
+class Unicorn extends Obstacle {
+  constructor() {
+    super(8, 15, 60);
+    this.domElement.className = "unicorn";
+    this.appearanceTime = 2500;
+    this.appear();
+  }
+
+  appear() {
+    const parentElm = document.getElementById("board");
+    parentElm.appendChild(this.domElement);
+    setTimeout(() => {
+      this.domElement.remove();
+      const index = this.obstaclesArr.indexOf(this);
+      if (index > -1) {
+        this.obstaclesArr.splice(index, 1);
+      }
+    }, this.appearanceTime);
   }
 }
 

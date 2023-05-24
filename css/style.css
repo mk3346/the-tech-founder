@@ -36,13 +36,13 @@ body {
 }
 
 #board {
-  background-image: url("../images/background.jpg");
+  background-image: url("../images/background_1.jpg");
   background-size: cover;
   background-repeat: repeat-x;
   background-position: 0 0;
   border-style: inset;
   border-right-width: 2px;
-  width: 60vw;
+  width: 80vw;
   height: 80vh;
   position: relative;
   overflow: hidden;
@@ -63,15 +63,8 @@ body {
   position: absolute;
 }
 
-.obstacle {
-  background-image: url("../images/money-big.png");
-  background-size: contain;
-  background-repeat: no-repeat;
-  position: absolute;
-}
-
 .money-coin {
-  background-image: url("../images/money-small.png");
+  background-image: url("../images/money.png");
   background-size: contain;
   background-repeat: no-repeat;
   position: absolute;
@@ -79,6 +72,20 @@ body {
 
 .happy-customer {
   background-image: url("../images/customer.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  position: absolute;
+}
+
+.venture-capitalist {
+  background-image: url("../images/vc.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  position: absolute;
+}
+
+.unicorn {
+  background-image: url("../images/unicorn.png");
   background-size: contain;
   background-repeat: no-repeat;
   position: absolute;
