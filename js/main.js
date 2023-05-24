@@ -5,6 +5,7 @@ class Game {
     this.isGameStarted = false;
     this.money = 100000;
     this.customers = 0;
+    this.ventureCapitalists = 0;
     this.level = 1;
   }
 
@@ -79,11 +80,6 @@ class Game {
     const parentElm = document.getElementById("board");
     parentElm.appendChild(this.fundingStatus);
 
-    this.unicornInterval = setInterval(() => {
-      const newObstacle = new Unicorn();
-      this.obstaclesArr.push(newObstacle);
-    }, 9000);
-
     this.ventureCapitalistInterval = setInterval(() => {
       const newObstacle = new VentureCapitalist();
       this.obstaclesArr.push(newObstacle);
@@ -103,10 +99,35 @@ class Game {
     }, 3000);
   }
 
+  startLevel3() {
+    this.boardElement = document.getElementById("board");
+    this.boardElement.style.backgroundImage =
+      "url('../images/background_3.jpg')";
+
+    this.unicornInterval = setInterval(() => {
+      const newObstacle = new Unicorn();
+      this.obstaclesArr.push(newObstacle);
+    }, 9000);
+
+    setInterval(() => {
+      this.obstaclesArr.forEach((obstacleInstance) => {
+        this.detectCollision(obstacleInstance);
+      });
+    }, 60);
+
+    this.moneyDecreaseInterval = setInterval(() => {
+      this.updateMoney(-10000);
+      if (this.money < 0) {
+        this.showReplayAlert();
+      }
+    }, 3000);
+  }
+
   stopGame() {
     clearInterval(this.moneyCoinInterval);
     clearInterval(this.customerInterval);
     clearInterval(this.moneyDecreaseInterval);
+    clearInterval(this.ventureCapitalistInterval);
 
     for (const obstacle of this.obstaclesArr) {
       obstacle.remove();
@@ -163,6 +184,14 @@ class Game {
             this.stopGame();
           }, 2000);
         }
+      } else if (obstacleInstance instanceof VentureCapitalist) {
+        this.updateVentureCapitalists(1);
+        if (this.ventureCapitalists >= 3) {
+          this.showLevel3Alert();
+          setTimeout(() => {
+            this.stopGame();
+          }, 2000);
+        }
       }
 
       obstacleInstance.domElement.remove();
@@ -189,6 +218,21 @@ class Game {
     this.customers += amount;
     const customersElement = document.getElementById("customers");
     customersElement.textContent = "Customers: " + this.customers;
+  }
+
+  updateVentureCapitalists(amount) {
+    this.ventureCapitalists += amount;
+
+    if (this.ventureCapitalists === 1) {
+      const fundingElement = document.getElementById("funding-status");
+      fundingElement.textContent = "Funding: Series A";
+    } else if (this.ventureCapitalists === 2) {
+      const fundingElement = document.getElementById("funding-status");
+      fundingElement.textContent = "Funding: Series B";
+    } else if (this.ventureCapitalists === 3) {
+      const fundingElement = document.getElementById("funding-status");
+      fundingElement.textContent = "Funding: Series C";
+    }
   }
 
   showLevel2Alert() {
@@ -222,6 +266,39 @@ class Game {
       level2Button.addEventListener("click", () => {
         this.startLevel2();
         level2Popup.remove();
+      });
+    }
+  }
+
+  showLevel3Alert() {
+    if (this.level === 2) {
+      this.level = 3;
+      const levelElement = document.getElementById("level");
+      levelElement.textContent = "Level: " + this.level;
+
+      const level3Popup = document.createElement("div");
+      level3Popup.className = "popup";
+      level3Popup.innerHTML = `
+        <h2>Level 3: Unicorn</h2>
+        <br>
+        <p>Congrats! You have successfully scaled your start-up</p>
+        <p>In this level your goal is to become a unicorn.</p>
+        <br>
+        <ul>
+          <li>     Use the left and right arrow keys to move the player</li>
+          <li>     Press the spacebar to jump up</li>
+          <li>     Catch a Unicorn</li>
+        </ul>
+        <br>
+        <button class="level3Button glow-on-hover">Start Game</button>
+      `;
+      document.body.appendChild(level3Popup);
+
+      const level3Button =
+        level3Popup.getElementsByClassName("level3Button")[0];
+      level3Button.addEventListener("click", () => {
+        this.startLevel3();
+        level3Popup.remove();
       });
     }
   }
