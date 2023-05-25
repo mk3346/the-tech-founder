@@ -69,7 +69,7 @@ class Game {
   startLevel2() {
     this.boardElement = document.getElementById("board");
     this.boardElement.style.backgroundImage =
-      "url('../images/background_2.jpg')";
+      "url('images/background_2.jpg')";
 
     const customersElement = document.getElementById("customers");
     customersElement.remove();
