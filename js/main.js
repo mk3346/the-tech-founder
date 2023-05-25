@@ -102,7 +102,7 @@ class Game {
   startLevel3() {
     this.boardElement = document.getElementById("board");
     this.boardElement.style.backgroundImage =
-      "url('../images/background_3.jpg')";
+      "url('images/background_3.jpg')";
 
     this.unicornInterval = setInterval(() => {
       const newObstacle = new Unicorn();
