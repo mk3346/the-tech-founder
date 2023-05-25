@@ -6,6 +6,7 @@ class Game {
     this.money = 100000;
     this.customers = 0;
     this.ventureCapitalists = 0;
+    this.unicorns = 0;
     this.level = 1;
   }
 
@@ -14,15 +15,14 @@ class Game {
       const popup = document.createElement("div");
       popup.className = "popup";
       popup.innerHTML = `
-        <h2>Level 1: Pre-Seed</h2>
+        <h3>Level 1: Product-Market Fit</h2>
         <br>
-        <p>You have just founded a company and developed a working MVP.</p>
-        <p>In this level your goal is to prove Product-Market Fit by catching 5 customers before money runs out. Make sure to also collect some cash to be better equipped for Level 2.</p>
+        <p>You have a <b>(bug-free) MVP</b> and 100k from friends & family.<br>Win 5 customers before you run out of cash - better be fast my friend! &#128516</p>
         <br>
         <ul>
-          <li>     Use the left and right arrow keys to move the player</li>
-          <li>     Collect coins to increase cash at hand</li>
-          <li>     Collect 5 customers to proceed to Level 2 (Seed)</li>
+          <li>       Use the left + right arrow keys to move</li>
+          <li>       Collect cash to keep the company afloat</li>
+          <li>       Catch 5 customers to proceed to Level 2</li>
         </ul>
         <br>
         <button class="okButton glow-on-hover">Start Game</button>
@@ -43,14 +43,14 @@ class Game {
 
   startLevel1() {
     this.moneyCoinInterval = setInterval(() => {
-      const newObstacle = new MoneyCoin();
+      const newObstacle = new MoneyCoin(this.obstaclesArr);
       this.obstaclesArr.push(newObstacle);
-    }, 3700);
+    }, 3000);
 
     this.customerInterval = setInterval(() => {
-      const newObstacle = new HappyCustomer();
+      const newObstacle = new HappyCustomer(this.obstaclesArr);
       this.obstaclesArr.push(newObstacle);
-    }, 8500);
+    }, 8000);
 
     setInterval(() => {
       this.obstaclesArr.forEach((obstacleInstance) => {
@@ -60,16 +60,21 @@ class Game {
 
     this.moneyDecreaseInterval = setInterval(() => {
       this.updateMoney(-10000);
-      if (this.money < 0) {
-        this.showReplayAlert();
+      if (this.money <= 0) {
+        this.showGameOverAlert();
+        this.stopGame();
       }
-    }, 3000);
+    }, 2000);
   }
 
   startLevel2() {
+    this.money = 1000000;
+    const moneyElement = document.getElementById("money");
+    moneyElement.textContent =
+      "Money: " + this.money.toLocaleString("en-US") + " EUR";
+
     this.boardElement = document.getElementById("board");
-    this.boardElement.style.backgroundImage =
-      "url('images/background_2.jpg')";
+    this.boardElement.style.backgroundImage = "url('images/background_2.jpg')";
 
     const customersElement = document.getElementById("customers");
     customersElement.remove();
@@ -81,9 +86,9 @@ class Game {
     parentElm.appendChild(this.fundingStatus);
 
     this.ventureCapitalistInterval = setInterval(() => {
-      const newObstacle = new VentureCapitalist();
+      const newObstacle = new VentureCapitalist(this.obstaclesArr);
       this.obstaclesArr.push(newObstacle);
-    }, 6000);
+    }, 8000);
 
     setInterval(() => {
       this.obstaclesArr.forEach((obstacleInstance) => {
@@ -92,20 +97,20 @@ class Game {
     }, 60);
 
     this.moneyDecreaseInterval = setInterval(() => {
-      this.updateMoney(-10000);
-      if (this.money < 0) {
-        this.showReplayAlert();
+      this.updateMoney(-150000);
+      if (this.money <= 0) {
+        this.showGameOverAlert();
+        this.stopGame();
       }
-    }, 3000);
+    }, 2000);
   }
 
   startLevel3() {
     this.boardElement = document.getElementById("board");
-    this.boardElement.style.backgroundImage =
-      "url('images/background_3.jpg')";
+    this.boardElement.style.backgroundImage = "url('images/background_3.jpg')";
 
     this.unicornInterval = setInterval(() => {
-      const newObstacle = new Unicorn();
+      const newObstacle = new Unicorn(this.obstaclesArr);
       this.obstaclesArr.push(newObstacle);
     }, 9000);
 
@@ -116,11 +121,16 @@ class Game {
     }, 60);
 
     this.moneyDecreaseInterval = setInterval(() => {
-      this.updateMoney(-10000);
-      if (this.money < 0) {
-        this.showReplayAlert();
+      this.updateMoney(-250000);
+      if (this.money <= 0) {
+        this.showGameOverAlert();
+        this.stopGame();
       }
-    }, 3000);
+    }, 2000);
+
+    if (this.player && this.player instanceof Player) {
+      this.player.jumpHeight += 20;
+    }
   }
 
   stopGame() {
@@ -129,9 +139,9 @@ class Game {
     clearInterval(this.moneyDecreaseInterval);
     clearInterval(this.ventureCapitalistInterval);
 
-    for (const obstacle of this.obstaclesArr) {
+    this.obstaclesArr.forEach((obstacle) => {
       obstacle.remove();
-    }
+    });
     this.obstaclesArr = [];
   }
 
@@ -178,19 +188,22 @@ class Game {
         this.updateMoney(10000);
       } else if (obstacleInstance instanceof HappyCustomer) {
         this.updateCustomers(1);
-        if (this.customers >= 2) {
+        if (this.customers >= 5) {
           this.showLevel2Alert();
-          setTimeout(() => {
-            this.stopGame();
-          }, 2000);
+          this.stopGame();
         }
       } else if (obstacleInstance instanceof VentureCapitalist) {
         this.updateVentureCapitalists(1);
+        this.updateMoney(800000);
         if (this.ventureCapitalists >= 3) {
           this.showLevel3Alert();
-          setTimeout(() => {
-            this.stopGame();
-          }, 2000);
+          this.stopGame();
+        }
+      } else if (obstacleInstance instanceof Unicorn) {
+        this.unicorns++;
+        if (this.unicorns >= 1) {
+          this.showLevelCompleteAlert();
+          this.stopGame();
         }
       }
 
@@ -207,7 +220,7 @@ class Game {
     const moneyElement = document.getElementById("money");
     moneyElement.textContent =
       "Money: " + this.money.toLocaleString("en-US") + " EUR";
-    if (this.money < 31000) {
+    if (this.money < 51000) {
       moneyElement.style.color = "red";
     } else {
       moneyElement.style.color = "black";
@@ -244,20 +257,16 @@ class Game {
       const level2Popup = document.createElement("div");
       level2Popup.className = "popup";
       level2Popup.innerHTML = `
-        <h2>Level 2: Seed to Series C</h2>
+        <h2>Level 2: Grow or Die</h2>
         <br>
-        <p>Congrats! You have achieved Product-Market Fit and are now at Seed stage.</p>
-        <p>In this level your goal is to scale your start-up by taking on VCs.</p>
+        <p>Puuuuh that was close, but you made it!<br>Marketing is <b>very expensive</b> though - time to go fundraising &#129312</p>
         <br>
         <ul>
-          <li>     Use the left and right arrow keys to move the player</li>
-          <li>     NEW: Press the spacebar to jump up</li>
-          <li>     Avoid angry customers that will harm your valuation</li>
-          <li>     Get 3 venture capitalists on board</li>
-          <li>     Catch 1 unicorn to push your valuation to +1bn EUR</li>
+          <li>     New: Press the spacebar to <b>jump up</b></li>
+          <li>     Get 3 venture capitalists on board before money runs out</li>
         </ul>
         <br>
-        <button class="level2Button glow-on-hover">Start Game</button>
+        <button class="level2Button glow-on-hover">Start Level 2</button>
       `;
       document.body.appendChild(level2Popup);
 
@@ -279,18 +288,16 @@ class Game {
       const level3Popup = document.createElement("div");
       level3Popup.className = "popup";
       level3Popup.innerHTML = `
-        <h2>Level 3: Unicorn</h2>
+        <h2>Level 3: Moonshot Ideas</h2>
         <br>
-        <p>Congrats! You have successfully scaled your start-up</p>
-        <p>In this level your goal is to become a unicorn.</p>
+        <p>Nice you did it again - only <b>1% of startups</b> go that far! &#128515<br>Will you make it to the very top and reach a valuation of <b>$1 billion?</b></p>
         <br>
         <ul>
-          <li>     Use the left and right arrow keys to move the player</li>
-          <li>     Press the spacebar to jump up</li>
-          <li>     Catch a Unicorn</li>
+          <li>     Press the spacebar to jump <b>even higher now</b></li>
+          <li>     Catch a Unicorn before you lose it all</li>
         </ul>
         <br>
-        <button class="level3Button glow-on-hover">Start Game</button>
+        <button class="level3Button glow-on-hover">Start Level 3</button>
       `;
       document.body.appendChild(level3Popup);
 
@@ -303,18 +310,50 @@ class Game {
     }
   }
 
-  showReplayAlert() {
-    if (this.level === 1) {
-      const gameOverPopup = document.createElement("div");
-      gameOverPopup.className = "popup";
-      gameOverPopup.textContent = "Game Over! Your money ran out.";
-      document.body.appendChild(gameOverPopup);
-      setTimeout(() => {
-        gameOverPopup.remove();
-        location.reload();
-      }, 3000);
-    }
+  showLevelCompleteAlert() {
+    const levelCompletePopup = document.createElement("div");
+    levelCompletePopup.className = "popup";
+    levelCompletePopup.innerHTML = `
+      <h2>Booooom!</h2>
+      <br>
+      <p>You are now a Unicorn &#129412<br>Time to go for a drink with Elon, Jeff and Larry &#127870</p>
+      <br>
+      <iframe src="https://giphy.com/embed/CSbIZi52DvqnJPm1WA" width="250" height="250" frameBorder="0" class="giphy-embed" allowFullScreen></iframe><p><a href="https://giphy.com/gifs/unicorn-chubbicorns-chubbiverse-CSbIZi52DvqnJPm1WA">via GIPHY</a></p>
+      <br>
+      <button class="levelCompleteButton glow-on-hover">Play Again</button>
+    `;
+    document.body.appendChild(levelCompletePopup);
+
+    const levelCompleteButton = levelCompletePopup.getElementsByClassName(
+      "levelCompleteButton"
+    )[0];
+    levelCompleteButton.addEventListener("click", () => {
+      location.reload();
+      levelCompletePopup.remove();
+    });
   }
+
+  showGameOverAlert() {
+    const levelGameOverPopup = document.createElement("div");
+    levelGameOverPopup.className = "popup";
+    levelGameOverPopup.innerHTML = `
+      <p>Oh nooooo &#128553</p>
+      <br>
+      <iframe src="https://giphy.com/embed/eJ4j2VnYOZU8qJU3Py" width="250" height="150" frameBorder="0" class="giphy-embed" allowFullScreen></iframe><p><a href="https://giphy.com/gifs/universalafrica-back-to-you-matthewmole-matthew-mole-eJ4j2VnYOZU8qJU3Py">via GIPHY</a></p>
+      <br>
+      <button class="levelGameOverButton glow-on-hover">Play Again</button>
+    `;
+    document.body.appendChild(levelGameOverPopup);
+
+    const levelGameOverButton = levelGameOverPopup.getElementsByClassName(
+      "levelGameOverButton"
+    )[0];
+    levelGameOverButton.addEventListener("click", () => {
+      location.reload();
+      levelGameOverPopup.remove();
+    });
+  }
+  
 }
 
 class Player {
@@ -323,11 +362,11 @@ class Player {
     this.height = 25;
     this.positionX = 0;
     this.positionY = 0;
-    this.speedMultiplier = 2;
+    this.speedMultiplier = 5;
     this.domElement = null;
     this.createDomElement();
     this.isJumping = false;
-    this.jumpHeight = 50;
+    this.jumpHeight = 30;
   }
 
   createDomElement() {
@@ -349,7 +388,7 @@ class Player {
   }
 
   moveRight() {
-    const maxWidth = 100 - this.width - 20;
+    const maxWidth = 100 - this.width - 22;
     if (this.positionX < maxWidth) {
       this.positionX += this.speedMultiplier;
       this.domElement.style.left = this.positionX + "vw";
@@ -369,7 +408,7 @@ class Player {
         this.fallDown();
         return;
       }
-      this.positionY++;
+      this.positionY += 3;
       this.domElement.style.bottom = this.positionY + "vh";
       this.jumpUp();
     });
@@ -382,7 +421,7 @@ class Player {
         this.isJumping = false;
         return;
       }
-      this.positionY--;
+      this.positionY -= 4;
       this.domElement.style.bottom = this.positionY + "vh";
       this.fallDown();
     });
@@ -393,7 +432,7 @@ class Obstacle {
   constructor(width, height, positionY) {
     this.width = width;
     this.height = height;
-    this.positionX = Math.floor(Math.random() * (60 - this.width + 1));
+    this.positionX = Math.floor(Math.random() * (80 - this.width + 1));
     this.positionY = positionY;
     this.domElement = null;
 
@@ -412,35 +451,35 @@ class Obstacle {
 }
 
 class MoneyCoin extends Obstacle {
-  constructor() {
+  constructor(obstaclesArr) {
     super(4, 10, 2);
     this.domElement.className = "money-coin";
-    this.appearanceTime = 2000;
-    this.appear();
+    this.appearanceTime = 1500;
+    this.appear(obstaclesArr);
   }
 
-  appear() {
+  appear(obstaclesArr) {
     const parentElm = document.getElementById("board");
     parentElm.appendChild(this.domElement);
     setTimeout(() => {
       this.domElement.remove();
-      const index = this.obstaclesArr.indexOf(this);
+      const index = obstaclesArr.indexOf(this);
       if (index > -1) {
-        this.obstaclesArr.splice(index, 1);
+        obstaclesArr.splice(index, 1);
       }
     }, this.appearanceTime);
   }
 }
 
 class HappyCustomer extends Obstacle {
-  constructor() {
+  constructor(obstaclesArr) {
     super(3, 10, 20);
     this.domElement.className = "happy-customer";
-    this.appearanceTime = 2500;
-    this.appear();
+    this.appearanceTime = 2000;
+    this.appear(obstaclesArr);
   }
 
-  appear() {
+  appear(obstaclesArr) {
     const parentElm = document.getElementById("board");
     parentElm.appendChild(this.domElement);
     setTimeout(() => {
@@ -454,14 +493,14 @@ class HappyCustomer extends Obstacle {
 }
 
 class VentureCapitalist extends Obstacle {
-  constructor() {
+  constructor(obstaclesArr) {
     super(8, 15, 30);
     this.domElement.className = "venture-capitalist";
-    this.appearanceTime = 2500;
-    this.appear();
+    this.appearanceTime = 1500;
+    this.appear(obstaclesArr);
   }
 
-  appear() {
+  appear(obstaclesArr) {
     const parentElm = document.getElementById("board");
     parentElm.appendChild(this.domElement);
     setTimeout(() => {
@@ -475,14 +514,14 @@ class VentureCapitalist extends Obstacle {
 }
 
 class Unicorn extends Obstacle {
-  constructor() {
+  constructor(obstaclesArr) {
     super(8, 15, 60);
     this.domElement.className = "unicorn";
-    this.appearanceTime = 2500;
-    this.appear();
+    this.appearanceTime = 1500;
+    this.appear(obstaclesArr);
   }
 
-  appear() {
+  appear(obstaclesArr) {
     const parentElm = document.getElementById("board");
     parentElm.appendChild(this.domElement);
     setTimeout(() => {
